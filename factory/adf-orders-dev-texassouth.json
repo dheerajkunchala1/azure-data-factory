@@ -1,0 +1,9 @@
+{
+	"name": "adf-orders-dev-texassouth",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "123cece8-ef51-4872-afe9-5fbcc8f391f2",
+		"tenantId": "6f54ced7-7ac8-4cb7-9760-955bdb77b9d3"
+	}
+}

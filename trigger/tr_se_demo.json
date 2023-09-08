@@ -1,0 +1,25 @@
+{
+	"name": "tr_se_demo",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_se",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/landing/blobs/order_items",
+			"blobPathEndsWith": ".txt",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/207aa66f-c2c2-477f-ae87-ab6bb5ffbdc0/resourceGroups/RG1/providers/Microsoft.Storage/storageAccounts/storders00111",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

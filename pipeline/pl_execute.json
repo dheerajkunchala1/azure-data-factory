@@ -1,0 +1,83 @@
+{
+	"name": "pl_execute",
+	"properties": {
+		"activities": [
+			{
+				"name": "Landing to Raw",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_landing_to_raw_All",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Raw to Cleansed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Landing to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_raw_to_cleansed",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Cleansed to Structure",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Raw to Cleansed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_orders_cleansed_to_structured",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Structured to Analytics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Cleansed to Structure",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_orders_structured_analytics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-05T16:45:50Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

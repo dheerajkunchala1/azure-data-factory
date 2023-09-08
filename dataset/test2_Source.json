@@ -1,0 +1,33 @@
+{
+	"name": "test2_Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dl_orders",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"pSourceFileName1": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().pSourceFileName1",
+					"type": "Expression"
+				},
+				"folderPath": "source",
+				"fileSystem": "test2"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

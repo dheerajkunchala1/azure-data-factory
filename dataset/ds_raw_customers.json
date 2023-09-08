@@ -1,0 +1,40 @@
+{
+	"name": "ds_raw_customers",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dl_orders",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "02_Raw"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "customers_raw.json",
+				"folderPath": {
+					"value": "@formatDateTime(utcnow(),'yyyy-MM-dd')",
+					"type": "Expression"
+				},
+				"fileSystem": "raw"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"CUSTOMER_ID": {
+					"type": "integer"
+				},
+				"EMAIL_ADDRESS": {
+					"type": "string"
+				},
+				"FULL_NAME": {
+					"type": "string"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

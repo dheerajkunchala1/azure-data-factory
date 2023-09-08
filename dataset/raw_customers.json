@@ -1,0 +1,33 @@
+{
+	"name": "raw_customers",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dl_orders",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "customers_raw.json",
+				"fileSystem": "raw"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"CUSTOMER_ID": {
+					"type": "integer"
+				},
+				"EMAIL_ADDRESS": {
+					"type": "string"
+				},
+				"FULL_NAME": {
+					"type": "string"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

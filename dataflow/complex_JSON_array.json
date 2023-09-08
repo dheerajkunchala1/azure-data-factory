@@ -1,0 +1,84 @@
+{
+	"name": "complex_JSON_array",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "youtube_test_json",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "ls_dl_orders",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "flatten1"
+				},
+				{
+					"name": "flatten2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          kind as string,",
+				"          etag as string,",
+				"          nextPageToken as string,",
+				"          regionCode as string,",
+				"          pageInfo as (totalResults as integer, resultsPerPage as integer),",
+				"          items as (kind as string, etag as string, id as (kind as string, videoId as string), snippet as (publishedAt as string, channelId as string, title as string, description as string, thumbnails as (default as (url as string, width as integer, height as integer), medium as (url as string, width as integer, height as integer), high as (url as string, width as integer, height as integer)), channelTitle as string, liveBroadcastContent as string, publishTime as string))[]",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: true,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'arrayOfDocuments') ~> source1",
+				"source1 aggregate(VideoDetails = collect(@(VideoDetails=items)),",
+				"          regionCode = collect(@(regionCode))) ~> aggregate1",
+				"aggregate1 foldDown(unroll(regionCode, regionCode),",
+				"     mapColumn(",
+				"          regionCode,",
+				"          VideoDetails",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"flatten1 foldDown(unroll(VideoDetails.VideoDetails),",
+				"     mapColumn(",
+				"          regionCode,",
+				"          kind = VideoDetails.VideoDetails.kind,",
+				"          etag = VideoDetails.VideoDetails.etag,",
+				"          id = VideoDetails.VideoDetails.id,",
+				"          title = VideoDetails.VideoDetails.snippet.title,",
+				"          description = VideoDetails.VideoDetails.snippet.description,",
+				"          channelId = VideoDetails.VideoDetails.snippet.channelId,",
+				"          url = VideoDetails.VideoDetails.snippet.thumbnails.default.url,",
+				"          width = VideoDetails.VideoDetails.snippet.thumbnails.default.width,",
+				"          height = VideoDetails.VideoDetails.snippet.thumbnails.default.height",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten2",
+				"flatten2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'json',",
+				"     fileSystem: 'test',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
