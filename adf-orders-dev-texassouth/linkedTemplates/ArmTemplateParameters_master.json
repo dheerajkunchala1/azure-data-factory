@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-orders-dev-texassouth"
+		},
+		"AzureTableStorageTest_connectionString": {
+			"value": ""
+		},
+		"ls_dl_orders_accountKey": {
+			"value": ""
+		},
+		"ls_sql_orders_connectionString": {
+			"value": ""
+		},
+		"ls_st_orders_connectionString": {
+			"value": ""
+		},
+		"ls_dl_orders_properties_typeProperties_url": {
+			"value": "https://dlorders001111.dfs.core.windows.net/"
+		},
+		"tr_se_demo_properties_typeProperties_scope": {
+			"value": "/subscriptions/207aa66f-c2c2-477f-ae87-ab6bb5ffbdc0/resourceGroups/RG1/providers/Microsoft.Storage/storageAccounts/storders00111"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

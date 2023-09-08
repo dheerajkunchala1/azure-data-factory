@@ -1,0 +1,978 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-orders-dev-texassouth"
+		},
+		"tr_se_demo_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/207aa66f-c2c2-477f-ae87-ab6bb5ffbdc0/resourceGroups/RG1/providers/Microsoft.Storage/storageAccounts/storders00111"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/df_test')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_raw_order_items",
+								"type": "DatasetReference"
+							},
+							"name": "OrderItemsRaw"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_test_sink_order_items",
+								"type": "DatasetReference"
+							},
+							"name": "OrderItemsTestSink"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(output(",
+						"          ORDER_ID as short,",
+						"          LINE_ITEM_ID as short,",
+						"          PRODUCT_ID as short,",
+						"          UNIT_PRICE as short,",
+						"          QUANTITY as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> OrderItemsRaw",
+						"OrderItemsRaw sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['order_items.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> OrderItemsTestSink"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_test1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_cleansed_orders",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(output(",
+						"          ORDER_ID as integer,",
+						"          ORDER_DATE as date,",
+						"          CUSTOMER_ID as integer,",
+						"          ORDER_STATUS as string,",
+						"          STORE_ID as integer,",
+						"          UPDATED_TIMESTAMP as timestamp",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: true,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> source1",
+						"source1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('key',",
+						"          0,",
+						"          ORDER_STATUS",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/raw to cleansed')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_raw_customers",
+								"type": "DatasetReference"
+							},
+							"name": "Customers"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_raw_products",
+								"type": "DatasetReference"
+							},
+							"name": "products"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_raw_stores",
+								"type": "DatasetReference"
+							},
+							"name": "stores"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_raw_orders_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "orders"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_raw_order_items",
+								"type": "DatasetReference"
+							},
+							"name": "orderitems"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_cleansed_customers",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_cleansed_products",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_cleansed_stores",
+								"type": "DatasetReference"
+							},
+							"name": "sink3"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_cleansed_orders",
+								"type": "DatasetReference"
+							},
+							"name": "sink4"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_cleansed_order_items",
+								"type": "DatasetReference"
+							},
+							"name": "sink5"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "cast1"
+						},
+						{
+							"name": "derivedColumn2"
+						},
+						{
+							"name": "cast2"
+						},
+						{
+							"name": "derivedColumn3"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "cast3"
+						},
+						{
+							"name": "derivedColumn4"
+						},
+						{
+							"name": "select2"
+						},
+						{
+							"name": "cast4"
+						},
+						{
+							"name": "derivedColumn5"
+						},
+						{
+							"name": "select3"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          CUSTOMER_ID as integer,",
+						"          EMAIL_ADDRESS as string,",
+						"          FULL_NAME as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'documentPerLine') ~> Customers",
+						"source(output(",
+						"          PRODUCT_ID as short,",
+						"          PRODUCT_NAME as string,",
+						"          UNIT_PRICE as double",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'documentPerLine') ~> products",
+						"source(output(",
+						"          LATITUDE as double,",
+						"          LONGITUDE as double,",
+						"          STORE_ID as short,",
+						"          STORE_NAME as string,",
+						"          WEB_ADDRESS as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'documentPerLine') ~> stores",
+						"source(output(",
+						"          ORDER_ID as string,",
+						"          ORDER_DATETIME as string,",
+						"          CUSTOMER_ID as string,",
+						"          ORDER_STATUS as string,",
+						"          STORE_ID as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> orders",
+						"source(output(",
+						"          ORDER_ID as short,",
+						"          LINE_ITEM_ID as short,",
+						"          PRODUCT_ID as short,",
+						"          UNIT_PRICE as double,",
+						"          QUANTITY as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> orderitems",
+						"Customers derive(UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumn1",
+						"products cast(output(",
+						"          PRODUCT_ID as integer,",
+						"          PRODUCT_NAME as string,",
+						"          UNIT_PRICE as double",
+						"     ),",
+						"     errors: true) ~> cast1",
+						"cast1 derive(UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumn2",
+						"stores cast(output(",
+						"          LATITUDE as double,",
+						"          LONGITUDE as double,",
+						"          STORE_ID as integer,",
+						"          STORE_NAME as string,",
+						"          WEB_ADDRESS as string",
+						"     ),",
+						"     errors: true) ~> cast2",
+						"cast2 derive(UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumn3",
+						"derivedColumn3 select(mapColumn(",
+						"          STORE_ID,",
+						"          STORE_NAME,",
+						"          LATITUDE,",
+						"          LONGITUDE,",
+						"          UPDATED_TIMESTAMP",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"orders cast(output(",
+						"          ORDER_ID as integer,",
+						"          ORDER_DATETIME as string,",
+						"          CUSTOMER_ID as integer,",
+						"          ORDER_STATUS as string,",
+						"          STORE_ID as integer",
+						"     ),",
+						"     errors: true) ~> cast3",
+						"cast3 derive(UPDATED_TIMESTAMP = currentUTC(),",
+						"          ORDER_DATE = toDate(ORDER_DATETIME, 'DD-MMM-yy HH.mm.ss.SS')) ~> derivedColumn4",
+						"derivedColumn4 select(mapColumn(",
+						"          ORDER_ID,",
+						"          ORDER_DATE,",
+						"          CUSTOMER_ID,",
+						"          ORDER_STATUS,",
+						"          STORE_ID,",
+						"          UPDATED_TIMESTAMP",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"orderitems cast(output(",
+						"          ORDER_ID as integer,",
+						"          LINE_ITEM_ID as short,",
+						"          PRODUCT_ID as integer,",
+						"          UNIT_PRICE as double,",
+						"          QUANTITY as integer",
+						"     ),",
+						"     errors: true) ~> cast4",
+						"cast4 derive(UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumn5",
+						"derivedColumn5 select(mapColumn(",
+						"          ORDER_ID,",
+						"          PRODUCT_ID,",
+						"          UNIT_PRICE,",
+						"          QUANTITY,",
+						"          UPDATED_TIMESTAMP",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select3",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink1",
+						"derivedColumn2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink2",
+						"select1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink3",
+						"select2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink4",
+						"select3 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink5"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Complex_JSON_Array_Pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "complex_JSON_array",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-03T14:43:26Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_test1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-01T17:31:37Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_test1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_orders_cleansed_to_structured')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_orders_cleansed_to_structured",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"stores": {},
+									"products": {},
+									"orders": {},
+									"orderitems": {},
+									"sink1": {},
+									"sink2": {},
+									"sink3": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-05T14:09:39Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_orders_structured_analytics')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_order_structured_analytics",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"products": {},
+									"orders": {},
+									"stores": {},
+									"sink1": {},
+									"sink2": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-05T15:10:38Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_raw_to_cleansed')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "raw to cleansed df",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "raw to cleansed",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"Customers": {},
+									"products": {},
+									"stores": {},
+									"orders": {},
+									"orderitems": {},
+									"sink1": {},
+									"sink2": {},
+									"sink3": {},
+									"sink4": {},
+									"sink5": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-01T15:48:58Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/raw to cleansed')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_sql_Sink2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_sql_sink",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"stores": {},
+									"products": {},
+									"source1": {},
+									"sink1": {},
+									"sink2": {},
+									"sink3": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-07T16:05:04Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_test')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_test1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-01T17:21:20Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_test1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/tr_se_demo')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pl_se",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/landing/blobs/order_items",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('tr_se_demo_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_execute')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Landing to Raw",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_landing_to_raw_All",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Raw to Cleansed",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Landing to Raw",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_raw_to_cleansed",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Cleansed to Structure",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Raw to Cleansed",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_orders_cleansed_to_structured",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Structured to Analytics",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Cleansed to Structure",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_orders_structured_analytics",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-05T16:45:50Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_raw_to_cleansed')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_orders_cleansed_to_structured')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_orders_structured_analytics')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_execute_modified')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Landing to Raw",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_landing_to_raw_All",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Raw to Cleansed",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Landing to Raw",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_raw_to_cleansed",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Cleansed to Structure",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Raw to Cleansed",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_orders_cleansed_to_structured",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Structured to Analytics",
+						"type": "ExecutePipeline",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "Cleansed to Structure",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_orders_structured_analytics",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-09-07T14:49:02Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_raw_to_cleansed')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_orders_cleansed_to_structured')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_orders_structured_analytics')]"
+			]
+		}
+	]
+}
