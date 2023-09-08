@@ -20,6 +20,12 @@
 		"ls_dl_orders_properties_typeProperties_url": {
 			"value": "https://dlorders001111.dfs.core.windows.net/"
 		},
+		"tw_window_properties_pipeline3_parameters_pEnd": {
+			"value": "@trigger().outputs.windowEndTime"
+		},
+		"tw_window_properties_pipeline3_parameters_pStart": {
+			"value": "@trigger().outputs.windowStartTime"
+		},
 		"containerUri": {
 			"value": ""
 		},

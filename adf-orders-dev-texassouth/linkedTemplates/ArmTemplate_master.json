@@ -27,6 +27,14 @@
 			"type": "string",
 			"defaultValue": "https://dlorders001111.dfs.core.windows.net/"
 		},
+		"tw_window_properties_pipeline3_parameters_pEnd": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowEndTime"
+		},
+		"tw_window_properties_pipeline3_parameters_pStart": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowStartTime"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -126,6 +134,12 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"tw_window_properties_pipeline3_parameters_pEnd": {
+						"value": "[parameters('tw_window_properties_pipeline3_parameters_pEnd')]"
+					},
+					"tw_window_properties_pipeline3_parameters_pStart": {
+						"value": "[parameters('tw_window_properties_pipeline3_parameters_pStart')]"
 					}
 				}
 			},
