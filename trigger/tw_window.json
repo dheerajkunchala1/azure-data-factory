@@ -1,0 +1,28 @@
+{
+	"name": "tw_window",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pipeline3",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"pEnd": "@trigger().outputs.windowEndTime",
+					"pStart": "@trigger().outputs.windowStartTime"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 5,
+				"startTime": "2023-09-09T11:17:00",
+				"timeZone": "Central Standard Time"
+			}
+		}
+	}
+}
