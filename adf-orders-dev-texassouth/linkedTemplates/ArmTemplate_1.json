@@ -559,6 +559,64 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/sql_sink_tw')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_orders",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "window_name",
+						"type": "varchar"
+					},
+					{
+						"name": "window_time",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tw_sink"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sql_source_tw')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_orders",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "window_name",
+						"type": "varchar"
+					},
+					{
+						"name": "window_time",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tw_source"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/stores_orders_monthly')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -662,218 +720,6 @@
 				"schema": []
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/youtube_test_json')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_dl_orders",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "sampleVideos.json",
-						"folderPath": "youtube_test",
-						"fileSystem": "test"
-					}
-				},
-				"schema": {
-					"type": "object",
-					"properties": {
-						"kind": {
-							"type": "string"
-						},
-						"etag": {
-							"type": "string"
-						},
-						"nextPageToken": {
-							"type": "string"
-						},
-						"regionCode": {
-							"type": "string"
-						},
-						"pageInfo": {
-							"type": "object",
-							"properties": {
-								"totalResults": {
-									"type": "integer"
-								},
-								"resultsPerPage": {
-									"type": "integer"
-								}
-							}
-						},
-						"items": {
-							"type": "array",
-							"items": {
-								"type": "object",
-								"properties": {
-									"kind": {
-										"type": "string"
-									},
-									"etag": {
-										"type": "string"
-									},
-									"id": {
-										"type": "object",
-										"properties": {
-											"kind": {
-												"type": "string"
-											},
-											"videoId": {
-												"type": "string"
-											}
-										}
-									},
-									"snippet": {
-										"type": "object",
-										"properties": {
-											"publishedAt": {
-												"type": "string"
-											},
-											"channelId": {
-												"type": "string"
-											},
-											"title": {
-												"type": "string"
-											},
-											"description": {
-												"type": "string"
-											},
-											"thumbnails": {
-												"type": "object",
-												"properties": {
-													"default": {
-														"type": "object",
-														"properties": {
-															"url": {
-																"type": "string"
-															},
-															"width": {
-																"type": "integer"
-															},
-															"height": {
-																"type": "integer"
-															}
-														}
-													},
-													"medium": {
-														"type": "object",
-														"properties": {
-															"url": {
-																"type": "string"
-															},
-															"width": {
-																"type": "integer"
-															},
-															"height": {
-																"type": "integer"
-															}
-														}
-													},
-													"high": {
-														"type": "object",
-														"properties": {
-															"url": {
-																"type": "string"
-															},
-															"width": {
-																"type": "integer"
-															},
-															"height": {
-																"type": "integer"
-															}
-														}
-													}
-												}
-											},
-											"channelTitle": {
-												"type": "string"
-											},
-											"liveBroadcastContent": {
-												"type": "string"
-											},
-											"publishTime": {
-												"type": "string"
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data1",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "JsonSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "JsonReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureTableSink",
-								"azureTableInsertType": "merge",
-								"writeBatchSize": 10000
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "youtube_test_json",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "AzureTable1",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-09-03T22:30:38Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/youtube_test_json')]"
-			]
 		}
 	]
 }
