@@ -6,18 +6,6 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "adf-orders-dev-texassouth"
-		},
-		"tr_se_demo_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/207aa66f-c2c2-477f-ae87-ab6bb5ffbdc0/resourceGroups/RG1/providers/Microsoft.Storage/storageAccounts/storders00111"
-		},
-		"trigger_tw_properties_pipeline_parameters_pEnd": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowEndTime"
-		},
-		"trigger_tw_properties_pipeline_parameters_pStart": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowStartTime"
 		}
 	},
 	"variables": {
@@ -1208,67 +1196,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/df_test1')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/tr_se_demo')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "pl_se",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/landing/blobs/order_items",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('tr_se_demo_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/trigger_tw')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "pipeline3",
-						"type": "PipelineReference"
-					},
-					"parameters": {
-						"pEnd": "[parameters('trigger_tw_properties_pipeline_parameters_pEnd')]",
-						"pStart": "[parameters('trigger_tw_properties_pipeline_parameters_pStart')]"
-					}
-				},
-				"type": "TumblingWindowTrigger",
-				"typeProperties": {
-					"frequency": "Minute",
-					"interval": 5,
-					"startTime": "2023-09-08T13:53:00Z",
-					"delay": "00:00:00",
-					"maxConcurrency": 50,
-					"retryPolicy": {
-						"intervalInSeconds": 30
-					},
-					"dependsOn": []
-				}
-			},
-			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pl_execute')]",

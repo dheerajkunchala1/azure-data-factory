@@ -20,15 +20,6 @@
 		"ls_dl_orders_properties_typeProperties_url": {
 			"value": "https://dlorders001111.dfs.core.windows.net/"
 		},
-		"tr_se_demo_properties_typeProperties_scope": {
-			"value": "/subscriptions/207aa66f-c2c2-477f-ae87-ab6bb5ffbdc0/resourceGroups/RG1/providers/Microsoft.Storage/storageAccounts/storders00111"
-		},
-		"trigger_tw_properties_pipeline_parameters_pEnd": {
-			"value": "@trigger().outputs.windowEndTime"
-		},
-		"trigger_tw_properties_pipeline_parameters_pStart": {
-			"value": "@trigger().outputs.windowStartTime"
-		},
 		"containerUri": {
 			"value": ""
 		},

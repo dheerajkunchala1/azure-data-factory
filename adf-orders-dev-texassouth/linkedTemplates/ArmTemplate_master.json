@@ -27,18 +27,6 @@
 			"type": "string",
 			"defaultValue": "https://dlorders001111.dfs.core.windows.net/"
 		},
-		"tr_se_demo_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/207aa66f-c2c2-477f-ae87-ab6bb5ffbdc0/resourceGroups/RG1/providers/Microsoft.Storage/storageAccounts/storders00111"
-		},
-		"trigger_tw_properties_pipeline_parameters_pEnd": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowEndTime"
-		},
-		"trigger_tw_properties_pipeline_parameters_pStart": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowStartTime"
-		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -138,15 +126,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"tr_se_demo_properties_typeProperties_scope": {
-						"value": "[parameters('tr_se_demo_properties_typeProperties_scope')]"
-					},
-					"trigger_tw_properties_pipeline_parameters_pEnd": {
-						"value": "[parameters('trigger_tw_properties_pipeline_parameters_pEnd')]"
-					},
-					"trigger_tw_properties_pipeline_parameters_pStart": {
-						"value": "[parameters('trigger_tw_properties_pipeline_parameters_pStart')]"
 					}
 				}
 			},
